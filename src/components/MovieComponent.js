@@ -3,23 +3,19 @@ import { View, Text, Image, StyleSheet } from 'react-native';
 import { Icon } from 'react-native-elements';
 
 export const ShowMovie = (props) => {
-  const { image, title, singer, year, isHome } = props;
-
+  const { image, title, viewers, isHome } = props;
+  const numberGrouping = (n) => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   return (
     <View style={[styles.horizontalDataContainer, { flex: isHome ? null : 1 }]}>
       <Image style={styles.movieImage} source={image} />
       <View style={styles.horizontalTitleContainer}>
         <Text style={styles.horizontalTitle}>{title}</Text>
       </View>
+
       <View style={styles.viewersContainer}>
-        <Icon
-          name="eye" // Nomor 1
-          type="entypo" // Nomor 2
-          size={18} // Nomor 3
-        />
+        <Icon name="eye" type="entypo" size={18} />
         <View style={styles.viewersText}>
-          <Text style={styles.singerText}>{singer}</Text>
-          <Text>{year}</Text>{' '}
+          <Text>{numberGrouping(viewers)}</Text>
         </View>
       </View>
     </View>
@@ -39,12 +35,12 @@ export const MovieExplanation = (props) => {
           rating === 5 ? (
             <Image
               style={styles.ratingImage}
-              source={require('../../assets/images/five-stars.png')} // Ganti tulisan 'path'
+              source={require('../../assets/images/five-stars.png')}
             />
           ) : rating === 4 ? (
             <Image
               style={styles.ratingImage}
-              source={require('../../assets/images/four-stars.png')} // Ganti tulisan 'path'
+              source={require('../../assets/images/four-stars.png')}
             />
           ) : rating === 3 ? (
             <Image
@@ -54,12 +50,12 @@ export const MovieExplanation = (props) => {
           ) : rating === 2 ? (
             <Image
               style={styles.ratingImage}
-              source={require('../../assets/images/two-stars.png')} // Ganti tulisan 'path'
+              source={require('../../assets/images/two-stars.png')}
             />
           ) : (
             <Image
               style={styles.ratingImage}
-              source={require('../../assets/images/star.png')} // Ganti tulisan 'path'
+              source={require('../../assets/images/star.png')}
             />
           )
         ) : (
@@ -74,6 +70,7 @@ const styles = StyleSheet.create({
   horizontalDataContainer: {
     margin: 8,
     width: 180,
+    height: 340,
     alignItems: 'center',
     borderColor: '#96ceb4',
     borderWidth: 2,
@@ -81,6 +78,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   horizontalTitleContainer: {
+    flex:1,
     marginTop: 8,
     marginBottom: 8,
   },
@@ -89,19 +87,39 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
+
   movieImage: {
     width: 130,
     height: 200,
     borderRadius: 10,
   },
+
   viewersContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   viewersText: {
     marginLeft: 8,
-  },  
-  mainContainer: {flexDirection: 'row',  marginVertical: 4},
-  valueContainer: {flex: 1},
-  ratingImage: {width: 100, height: 20, resizeMode: 'contain'},
+  },
+  mainContainer: {
+    flexDirection: 'row',
+    margin: 8,
+  },
+  nameContainer: {
+    flex: 1,
+  },
+  generalFontSize: {
+    fontSize: 16,
+  },
+  valueContainer: {
+    flex: 3,
+  },
+  textValue: {
+    textAlign: 'justify',
+    fontSize: 16,
+  },
+  ratingImage: {
+    width: 100,
+    height: 20,
+  },
 });

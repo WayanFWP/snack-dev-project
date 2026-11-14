@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+// Home Screen
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -7,80 +8,82 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
-import { songData } from '../../data/SongData';
+import { movieData } from '../data/MovieData';
+import { ShowMovie } from '../components/MovieComponent';
 import { ButtonComponent } from '../components/ButtonComponent';
 
-const ratingImages = {
-  1: require('../../assets/images/star.png'),
-  2: require('../../assets/images/two-stars.png'),
-  3: require('../../assets/images/three-stars.png'),
-  4: require('../../assets/images/four-stars.png'),
-  5: require('../../assets/images/five-stars.png'),
-};
-
 const HomeScreen = (props) => {
-  const { navigation } = props;
+  // variable[Getter, Setter]
   const [recommended, setRecommended] = useState([]);
-  const [newest, setNewest] = useState([]);
-  const [allNewest, setAllNewest] = useState([]);
+  const [Viewed, setViewed] = useState([]);
+  const [allMostViewed, setAllMostViewed] = useState([]);
+  const { navigation } = props;
 
-  const compareRating = (a, b) => b.rating - a.rating;
-  const compareYear = (a, b) => b.year - a.year;
+  const compareRating = (a, b) => {
+    const ratingA = a.rating;
+    const ratingB = b.rating;
+
+    if (ratingA > ratingB) {
+      return -1;
+    } else if (ratingA < ratingB) {
+      return 1;
+    } else {
+      return 0;
+    }
+  };
+
+  const compareViewers = (a, b) => {
+    const viewersA = a.viewers;
+    const viewersB = b.viewers;
+
+    if (viewersA > viewersB) {
+      return -1;
+    } else if (viewersA < viewersB) {
+      return 1;
+    } else {
+      return 0;
+    }
+  };
 
   useEffect(() => {
-    const sortedRecommended = [...songData].sort(compareRating);
-    const sortedNewest = [...songData].sort(compareYear);
+    const threeRecommended = [];
+    const threeMostViewed = [];
 
-    setRecommended(sortedRecommended.slice(0, 3));
-    setNewest(sortedNewest.slice(0, 3));
-    setAllNewest(sortedNewest);
+    const sortedMostViewed = [...movieData].sort(compareViewers);
+    const sortedRecommended = [...movieData].sort(compareRating);
+
+    setAllMostViewed(sortedMostViewed);
+
+    for (let i = 0; i < 3; i++) {
+      if (sortedRecommended[i]) {
+        threeRecommended.push(sortedRecommended[i]);
+      }
+      if (sortedMostViewed[i]) {
+        threeMostViewed.push(sortedMostViewed[i]);
+      }
+    }
+
+    setRecommended(threeRecommended);
+    setViewed(threeMostViewed);
   }, []);
 
   return (
     <View style={styles.mainContainer}>
       <FlatList
+        showsHorizontalScrollIndicator={false}
         data={recommended}
-        keyExtractor={(item) => String(item.id)}
+        keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.flatListContainer}
-        ListEmptyComponent={
-          <View style={{ alignItems: 'center' }}>
-            <Text>No items in this category.</Text>
-          </View>
-        }
-        renderItem={({ item }) => (
-          <View style={styles.dataContainer}>
-            <Image style={styles.songImage} source={{ uri: item.imageLink }} />
-
-            <View style={styles.songDescriptionContainer}>
-              <Text style={styles.title}>{item.title}</Text>
-              <Text style={styles.singer}>{item.singer}</Text>
-              <View style={styles.yearContainer}>
-                <Text>
-                  {item.year} • {item.genre}
-                </Text>
-              </View>
-              {ratingImages[item.rating] ? (
-                <Image
-                  style={styles.rateStars}
-                  source={ratingImages[item.rating]}
-                />
-              ) : null}
-              <ButtonComponent
-                onPress={() => navigation.navigate('DetailMovie', { item })}
-              />
-            </View>
-          </View>
-        )}
         ListHeaderComponent={
           <View>
-            <View style={styles.mainCategoryContainer}>
+            <View style={styles.categoryMainContainer}>
               <View style={styles.categoryContainer}>
-                <Text style={styles.categoryText}>Newest</Text>
+                <Text style={styles.categoryText}>Most Viewed</Text>
               </View>
               <View style={styles.seeAllContainer}>
                 <TouchableOpacity
                   onPress={() =>
-                    navigation.navigate('MostViewed', { allMostViewed: allNewest })
+                    navigation.navigate('MostViewed', { allMostViewed })
                   }>
                   <Text style={styles.seeAllText}>See All</Text>
                 </TouchableOpacity>
@@ -89,40 +92,81 @@ const HomeScreen = (props) => {
 
             <FlatList
               horizontal
-              data={newest}
-              keyExtractor={(item) => String(item.id)}
-              contentContainerStyle={{
-                flex: newest.length === 0 ? 1 : null,
-              }}
-              ListEmptyComponent={
-                <View style={{ alignItems: 'center', flex: 1 }}>
-                  <Text>No items in this category.</Text>
-                </View>
-              }
+              ScrollView
+              data={Viewed}
+              keyExtractor={(item) => item.id.toString()}
+              contentContainerStyle={styles.flatListContainer}
               renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.horizontalCard}
-                  onPress={() => navigation.navigate('DetailMovie', { item })}>
-                  <Image
-                    style={styles.songImage}
-                    source={{ uri: item.imageLink }}
-                  />
-                  <View style={styles.horizontalTitleContainer}>
-                    <Text style={styles.horizontalTitle}>{item.title}</Text>
-                  </View>
-                  <Text style={styles.horizontalSinger}>{item.singer}</Text>
-                  <Text>{item.year}</Text>
-                </TouchableOpacity>
+                <ShowMovie
+                  image={{ uri: item.imageLink }}
+                  title={item.title}
+                  viewers={item.viewers}
+                  isHome={true}
+                />
               )}
             />
 
-            <View style={styles.mainCategoryContainer}>
+            <View style={styles.categoryMainContainer}>
               <View style={styles.categoryContainer}>
                 <Text style={styles.categoryText}>Recommended</Text>
               </View>
             </View>
           </View>
         }
+        renderItem={({ item }) => {
+          return (
+            <View style={styles.dataContainer}>
+              <Image
+                style={styles.movieImage}
+                source={{ uri: item.imageLink }}
+              />
+              <View style={styles.movieDescriptionContainer}>
+                <Text style={styles.title}>{item.title}</Text>
+                <View style={styles.yearContainer}>
+                  <Text>{item.year}</Text>
+                </View>
+
+                {/* Rating Bintang */}
+                <View style={styles.ratingContainer}>
+                  {item.rating === 5 ? (
+                    <Image
+                      style={{ width: 100, height: 20 }}
+                      source={require('../../assets/images/five-stars.png')}
+                    />
+                  ) : item.rating === 4 ? (
+                    <Image
+                      style={{ width: 100, height: 20 }}
+                      source={require('../../assets/images/four-stars.png')}
+                    />
+                  ) : item.rating === 3 ? (
+                    <Image
+                      style={{ width: 100, height: 20 }}
+                      source={require('../../assets/images/three-stars.png')}
+                    />
+                  ) : item.rating === 2 ? (
+                    <Image
+                      style={{ width: 100, height: 20 }}
+                      source={require('../../assets/images/two-stars.png')}
+                    />
+                  ) : item.rating === 1 ? (
+                    <Image
+                      style={{ width: 100, height: 20 }}
+                      source={require('../../assets/images/star.png')}
+                    />
+                  ) : null}
+                </View>
+
+                <ButtonComponent
+                  onPress={() =>
+                    navigation.navigate('DetailMovie', {
+                      item,
+                    })
+                  }
+                />
+              </View>
+            </View>
+          );
+        }}
       />
     </View>
   );
@@ -135,14 +179,15 @@ const styles = StyleSheet.create({
   flatListContainer: {
     padding: 8,
   },
-  songImage: {
+  movieImage: {
+    height: 200,
     width: 130,
-    height: 130,
     borderRadius: 10,
   },
   dataContainer: {
     margin: 8,
     borderColor: '#96ceb4',
+    flex: 1,
     borderWidth: 2,
     borderRadius: 10,
     padding: 16,
@@ -152,25 +197,23 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  singer: {
-    fontSize: 14,
-    color: '#555',
-    marginTop: 2,
-  },
-  songDescriptionContainer: {
+  movieDescriptionContainer: {
     flex: 1,
-    justifyContent: 'center',
     marginLeft: 8,
+    justifyContent: 'space-between',
   },
   yearContainer: {
     marginTop: 8,
     marginBottom: 8,
   },
-  mainCategoryContainer: {
-    marginTop: 8,
-    marginLeft: 8,
-    marginRight: 8,
+  ratingContainer: {
+    marginBottom: 8,
+  },
+  categoryMainContainer: {
     flexDirection: 'row',
+    paddingHorizontal: 8,
+    marginTop: 8,
+    alignItems: 'center',
   },
   categoryContainer: {
     flex: 1,
@@ -178,10 +221,6 @@ const styles = StyleSheet.create({
   categoryText: {
     fontSize: 20,
     fontWeight: 'bold',
-  },
-  rateStars: {
-    width: 100,
-    height: 20,
   },
   seeAllContainer: {
     flex: 1,
@@ -191,30 +230,6 @@ const styles = StyleSheet.create({
   seeAllText: {
     color: '#009688',
     textDecorationLine: 'underline',
-  },
-  horizontalCard: {
-    margin: 8,
-    width: 180,
-    alignItems: 'center',
-    borderColor: '#96ceb4',
-    borderWidth: 2,
-    borderRadius: 10,
-    padding: 16,
-  },
-  horizontalTitleContainer: {
-    marginTop: 8,
-    marginBottom: 4,
-  },
-  horizontalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  horizontalSinger: {
-    fontSize: 13,
-    color: '#555',
-    textAlign: 'center',
-    marginBottom: 4,
   },
 });
 

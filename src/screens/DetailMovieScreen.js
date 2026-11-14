@@ -1,44 +1,50 @@
-import React, { useEffect } from 'react'; // Fixed import
-import { View, Text, Image, StyleSheet, ScrollView } from 'react-native';
-import { MovieExplanation } from '../components/MovieComponent';
+import { React, useEffect } from 'react';
+import { View, Text, Image, StyleSheet } from 'react-native';
+import {MovieExplanation} from "../components/MovieComponent"
 
 const DetailMovieScreen = (props) => {
   const { route } = props;
   const movie = route?.params?.item;
+  const numberGrouping = (n) => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
 
   useEffect(() => {
-    console.log(movie);
+    console.log(movie)
   }, [movie]);
-
-  if (!movie) {
-    return (
-      <View style={styles.mainContainer}>
-        <Text>No movie data found.</Text>
-      </View>
-    );
-  }
 
   return (
     <View style={styles.mainContainer}>
-      <ScrollView>
-        <View style={styles.movieContainer}>
-          <View style={styles.middle}>
-            <Image style={styles.image} source={{ uri: movie.imageLink }} />
-          </View>
-          <View style={styles.titleContainer}>
-            <Text style={styles.title}>{movie.title}</Text>
-          </View>
-          <MovieExplanation name="Singer" value={movie.singer} />
-          <MovieExplanation name="Release Year" value={movie.year} />
-          <MovieExplanation name="Genre" value={movie.genre} />
-          <MovieExplanation name="Songwriters" value={movie.songwriters} />
-          <MovieExplanation
-            name="Rating"
-            isRating={true}
-            rating={movie.rating}
-          />{' '}
+      <View style={styles.movieContainer}>
+        <View style={styles.middle}>
+          <Image style={styles.image} source={{ uri: movie.imageLink }} />
         </View>
-      </ScrollView>
+
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>{movie.title}</Text>
+        </View>
+
+        <MovieExplanation
+          name="Release Year " 
+          value={movie.year}
+        />
+        <MovieExplanation
+          name="Starring :" 
+          value={movie.starring}
+        />
+        <MovieExplanation
+          name="Description :" 
+          value={movie.description} 
+        />
+        <MovieExplanation
+          name="Viewers :"
+          value={numberGrouping(movie.viewers)}
+        />
+        <MovieExplanation
+          name="Rating :" 
+          isRating={true} 
+          rating={movie.rating} 
+        />
+      </View>
     </View>
   );
 };
